@@ -88,10 +88,11 @@ const Auth = () => {
 
       navigate("/home");
     } catch (err) {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
       toast({
         variant: "destructive",
         title: "Network error",
-        description: "Could not reach the server. Is the backend running on port 5000?",
+        description: `Could not reach the server at ${apiBaseUrl}. Check your internet connection or try again later.`,
       });
     } finally {
       setIsSubmitting(false);

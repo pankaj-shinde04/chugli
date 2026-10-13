@@ -15,24 +15,29 @@ const app = express();
 
 const server = http.createServer(app);
 
-const corsOrigin = (process.env.CORS_ORIGIN || "*").replace(/\/+$/, "");
+// Support comma-separated origins: e.g. "https://chugli-rust.vercel.app,http://localhost:8080"
+const rawOrigin = process.env.CORS_ORIGIN || "*";
+const corsOrigin =
+  rawOrigin === "*"
+    ? "*"
+    : rawOrigin.split(",").map((o) => o.trim().replace(/\/+$/, ""));
+
+const corsOptions = {
+  origin: corsOrigin,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
 const io = new Server(server, {
-  cors: {
-    origin: corsOrigin,
-    methods: ["GET", "POST", "OPTIONS"],
-  },
+  cors: corsOptions,
 });
 
 app.set("io", io);
 
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: corsOrigin,
-  })
-);
+app.use(cors(corsOptions));
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
